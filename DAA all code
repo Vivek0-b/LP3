@@ -1,0 +1,256 @@
+# Non-recursive (iterative) Fibonacci series
+def fib_iterative(n):
+    a, b = 0, 1
+    print("Fibonacci Series (Iterative):")
+    for i in range(n):
+        print(a, end=" ")
+        a, b = b, a + b
+
+# Example
+n = int(input("Enter number of terms: "))
+fib_iterative(n)
+
+
+
+# Recursive function to print Fibonacci series
+def fib_recursive(n):
+    if n <= 1:
+        return n
+    else:
+        return fib_recursive(n - 1) + fib_recursive(n - 2)
+
+print("Fibonacci Series (Recursive):")
+def print_fib_series(n):
+    for i in range(n):
+        print(fib_recursive(i), end=" ")
+
+# Example
+n = int(input("Enter number of terms: "))
+print_fib_series(n)
+
+
+
+
+
+import heapq
+
+# A Huffman Tree Node
+class Node:
+    def __init__(self, char, freq):
+        self.char = char
+        self.freq = freq
+        self.left = None
+        self.right = None
+
+    # defining comparison operators for priority queue
+    def __lt__(self, other):
+        return self.freq < other.freq
+
+# Function to generate Huffman Codes using a Greedy approach
+def huffman_encoding(char_freq):
+    # Create a priority queue (min-heap)
+    heap = [Node(char, freq) for char, freq in char_freq.items()]
+    heapq.heapify(heap)
+
+    # Step 1: Build Huffman Tree
+    while len(heap) > 1:
+        # Extract two nodes with minimum frequency
+        left = heapq.heappop(heap)
+        right = heapq.heappop(heap)
+
+        # Create new internal node with combined frequency
+        merged = Node(None, left.freq + right.freq)
+        merged.left = left
+        merged.right = right
+
+        # Add merged node back into the heap
+        heapq.heappush(heap, merged)
+
+    # Root node
+    root = heap[0]
+
+    # Step 2: Generate Huffman Codes
+    codes = {}
+    generate_codes(root, "", codes)
+    return codes
+
+# Recursive function to generate Huffman codes
+def generate_codes(node, current_code, codes):
+    if node is None:
+        return
+
+    # If it's a leaf node, assign the code
+    if node.char is not None:
+        codes[node.char] = current_code
+        return
+
+    # Traverse left and right
+    generate_codes(node.left, current_code + "0", codes)
+    generate_codes(node.right, current_code + "1", codes)
+
+# Example usage
+if __name__ == "__main__":
+    text = input("Enter text to encode: ")
+
+    # Calculate character frequencies
+    freq = {}
+    for char in text:
+        freq[char] = freq.get(char, 0) + 1
+
+    # Generate Huffman Codes
+    huffman_codes = huffman_encoding(freq)
+
+    # Print codes
+    print("\nCharacter\tFrequency\tHuffman Code")
+    for char, code in huffman_codes.items():
+        print(f"{char}\t\t{freq[char]}\t\t{code}")
+
+    # Encode the text
+    encoded_text = ''.join(huffman_codes[char] for char in text)
+    print("\nEncoded Text:", encoded_text)
+
+
+
+# Fractional Knapsack using Greedy Method
+
+def fractional_knapsack(values, weights, capacity):
+    n = len(values)
+
+    # Step 1: Calculate value/weight ratio for each item
+    ratio = []
+    for i in range(n):
+        ratio.append((values[i] / weights[i], values[i], weights[i]))  # (ratio, value, weight)
+
+    # Step 2: Sort items in decreasing order of value/weight ratio
+    ratio.sort(reverse=True)
+
+    total_value = 0.0  # Total value in knapsack
+    remaining_capacity = capacity
+
+    # Step 3: Select items greedily
+    for r, v, w in ratio:
+        if remaining_capacity >= w:
+            # Take the whole item
+            remaining_capacity -= w
+            total_value += v
+            print(f"Took full item (value={v}, weight={w})")
+        else:
+            # Take fraction of the item
+            fraction = remaining_capacity / w
+            total_value += v * fraction
+            print(f"Took {fraction*100:.2f}% of item (value={v}, weight={w})")
+            break  # Knapsack is full
+
+    return total_value
+
+# Example input
+values = [60, 100, 120]     # Values of items
+weights = [10, 20, 30]      # Weights of items
+capacity = 50               # Total capacity of knapsack
+
+max_value = fractional_knapsack(values, weights, capacity)
+print("\nMaximum value in Knapsack =", max_value)
+
+
+
+
+# 0-1 Knapsack Problem using Dynamic Programming
+
+def knapsack(values, weights, capacity):
+    n = len(values)
+
+    # Step 1: Create DP table with (n+1) x (capacity+1)
+    dp = [[0 for _ in range(capacity + 1)] for _ in range(n + 1)]
+
+    # Step 2: Build table in bottom-up manner
+    for i in range(1, n + 1):
+        for w in range(1, capacity + 1):
+            if weights[i-1] <= w:
+                # Item can be included
+                dp[i][w] = max(values[i-1] + dp[i-1][w - weights[i-1]],
+                               dp[i-1][w])
+            else:
+                # Item cannot be included
+                dp[i][w] = dp[i-1][w]
+
+    # Step 3: dp[n][capacity] contains the result
+    return dp[n][capacity]
+
+# Example usage
+values = [60, 100, 120]    # Values of items
+weights = [10, 20, 30]     # Weights of items
+capacity = 50              # Capacity of knapsack
+
+max_value = knapsack(values, weights, capacity)
+print("Maximum value in 0/1 Knapsack =", max_value)
+
+
+
+
+
+# N-Queens Problem using Backtracking
+
+def print_board(board, n):
+    for i in range(n):
+        for j in range(n):
+            print(board[i][j], end=" ")
+        print()
+    print()
+
+# Check if a queen can be safely placed at board[row][col]
+def is_safe(board, row, col, n):
+    # Check same column
+    for i in range(row):
+        if board[i][col] == 1:
+            return False
+
+    # Check upper left diagonal
+    i, j = row - 1, col - 1
+    while i >= 0 and j >= 0:
+        if board[i][j] == 1:
+            return False
+        i -= 1
+        j -= 1
+
+    # Check upper right diagonal
+    i, j = row - 1, col + 1
+    while i >= 0 and j < n:
+        if board[i][j] == 1:
+            return False
+        i -= 1
+        j += 1
+
+    return True
+
+# Solve N-Queens using backtracking
+def solve_n_queens(board, row, n):
+    # Base condition: All queens placed
+    if row == n:
+        print("Final N-Queens Matrix:")
+        print_board(board, n)
+        return True  # Found one valid configuration
+
+    # Try placing queen in each column of current row
+    for col in range(n):
+        if is_safe(board, row, col, n):
+            board[row][col] = 1  # Place queen
+            if solve_n_queens(board, row + 1, n):
+                return True  # Stop at first solution
+            board[row][col] = 0  # Backtrack if not possible
+
+    return False
+
+# --- Main Program ---
+n = int(input("Enter number of Queens (n): "))
+board = [[0 for _ in range(n)] for _ in range(n)]
+
+# Place first queen manually (you can change position)
+first_row, first_col = 0, 0
+board[first_row][first_col] = 1
+
+print("Initial Board with first Queen placed:")
+print_board(board, n)
+
+# Start solving from next row
+if not solve_n_queens(board, first_row + 1, n):
+    print("No solution exists.")
